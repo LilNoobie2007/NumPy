@@ -4,6 +4,17 @@ import { useAuth } from '../../app/providers/AuthProvider';
 import { getCompanionRelationships, type Relationship } from '../../lib/supabase/relationshipService';
 import { supabase } from '../../lib/supabase/client';
 
+// Reusable UI component for the metric cards
+const MetricCard = ({ icon, title, value, color, bg }: { icon: string, title: string, value: string | number, color: string, bg: string }) => (
+  <div className="p-4 bg-white border border-gray-100 shadow-sm rounded-2xl">
+    <div className={`w-10 h-10 flex items-center justify-center rounded-full ${bg} ${color} mb-3 text-lg`}>
+      {icon}
+    </div>
+    <p className="text-xs font-semibold tracking-wider text-gray-500 uppercase">{title}</p>
+    <p className="mt-1 text-lg font-bold text-gray-900 truncate">{value}</p>
+  </div>
+);
+
 export const CompanionDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -11,10 +22,14 @@ export const CompanionDashboard = () => {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Read-only data states
-  const [steps, setSteps] = useState(0);
-  const [calories, setCalories] = useState(0);
-  const [latestMood, setLatestMood] = useState('Not logged yet');
+  const [metrics, setMetrics] = useState({
+    steps: 0,
+    calories: 0,
+    water: 0,
+    mood: 'No data',
+    weight: 'No data',
+    periodFlow: null as string | null,
+  });
 
   useEffect(() => {
     if (user) initialize();
@@ -25,9 +40,7 @@ export const CompanionDashboard = () => {
     const rels = await getCompanionRelationships(user.id);
     const active = rels.filter(r => r.status === 'active');
     setFollowing(active);
-    if (active.length > 0) {
-      setActiveId(active[0].primary_user_id);
-    }
+    if (active.length > 0) setActiveId(active[0].primary_user_id);
     setLoading(false);
   };
 
@@ -39,62 +52,67 @@ export const CompanionDashboard = () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const isoString = today.toISOString();
+    const dateString = isoString.split('T')[0];
 
-    // 1. Fetch Steps
-    const { data: stepData } = await supabase
-      .from('step_logs')
-      .select('steps')
-      .eq('user_id', targetUserId)
-      .gte('recorded_at', isoString);
-    setSteps(stepData?.reduce((acc, log) => acc + log.steps, 0) || 0);
+    // Fetch all companion data concurrently for speed
+    const [
+      { data: stepData },
+      { data: mealData },
+      { data: waterData },
+      { data: moodData },
+      { data: weightData },
+      { data: periodData }
+    ] = await Promise.all([
+      supabase.from('step_logs').select('steps').eq('user_id', targetUserId).gte('recorded_at', isoString),
+      supabase.from('meals').select('estimated_calories').eq('user_id', targetUserId).gte('recorded_at', isoString),
+      supabase.from('water_logs').select('amount').eq('user_id', targetUserId).gte('recorded_at', isoString),
+      supabase.from('mood_logs').select('mood_level').eq('user_id', targetUserId).gte('recorded_at', isoString).order('recorded_at', { ascending: false }).limit(1),
+      supabase.from('weight_logs').select('weight').eq('user_id', targetUserId).gte('recorded_at', isoString).order('recorded_at', { ascending: false }).limit(1),
+      supabase.from('period_logs').select('flow_intensity').eq('user_id', targetUserId).eq('start_date', dateString).limit(1)
+    ]);
 
-    // 2. Fetch Meals (Calories)
-    const { data: mealData } = await supabase
-      .from('meals')
-      .select('estimated_calories')
-      .eq('user_id', targetUserId)
-      .gte('recorded_at', isoString);
-    setCalories(mealData?.reduce((acc, log) => acc + log.estimated_calories, 0) || 0);
-
-    // 3. Fetch Latest Mood
-    const { data: moodData } = await supabase
-      .from('mood_logs')
-      .select('mood_level')
-      .eq('user_id', targetUserId)
-      .gte('recorded_at', isoString)
-      .order('recorded_at', { ascending: false })
-      .limit(1);
-    setLatestMood(moodData?.[0]?.mood_level || 'Not logged yet');
+    setMetrics({
+      steps: stepData?.reduce((acc, log) => acc + log.steps, 0) || 0,
+      calories: mealData?.reduce((acc, log) => acc + log.estimated_calories, 0) || 0,
+      water: waterData?.reduce((acc, log) => acc + log.amount, 0) || 0,
+      mood: moodData?.[0]?.mood_level || 'No data',
+      weight: weightData?.[0]?.weight ? `${weightData[0].weight} kg` : 'No data',
+      periodFlow: periodData?.[0]?.flow_intensity || null,
+    });
   };
 
-  if (loading) return <div className="p-4 text-center">Loading dashboard...</div>;
+  if (loading) return <div className="p-4 text-center text-gray-500 animate-pulse">Loading dashboard...</div>;
 
   return (
     <div className="min-h-screen pb-20 bg-gray-50">
-      <header className="sticky top-0 z-10 flex items-center gap-4 px-6 py-5 bg-white shadow-sm">
-        <button onClick={() => navigate('/')} className="text-gray-500 hover:text-gray-900">
-          ← Back
-        </button>
-        <h1 className="text-xl font-bold text-gray-900">Companion View</h1>
+      <header className="sticky top-0 z-10 bg-white shadow-sm">
+        <div className="flex items-center gap-4 px-6 py-5 mx-auto max-w-md">
+          <button onClick={() => navigate('/')} className="text-gray-400 transition-colors hover:text-gray-900">
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+          </button>
+          <h1 className="text-xl font-bold text-gray-900">Partner View</h1>
+        </div>
       </header>
 
       <main className="max-w-md p-6 mx-auto space-y-6">
         {following.length === 0 ? (
           <div className="p-6 text-center bg-white border border-gray-100 shadow-sm rounded-2xl">
-            <p className="text-gray-500">You are not following anyone yet.</p>
-            <p className="mt-2 text-sm text-gray-400">Ask a friend for their code and add them in Settings.</p>
+            <div className="flex items-center justify-center w-12 h-12 mx-auto mb-3 bg-blue-50 rounded-full text-blue-500 text-xl">👥</div>
+            <p className="font-medium text-gray-900">No partner connected yet.</p>
+            <p className="mt-1 text-sm text-gray-500">Add a friend code in Settings to view their stats here.</p>
           </div>
         ) : (
           <>
-            <div className="flex gap-2 pb-2 overflow-x-auto">
+            {/* Partner Selector Tabs */}
+            <div className="flex gap-2 pb-2 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
               {following.map(rel => (
                 <button
                   key={rel.id}
                   onClick={() => setActiveId(rel.primary_user_id)}
-                  className={`px-4 py-2 text-sm font-semibold rounded-xl whitespace-nowrap transition-colors ${
+                  className={`px-5 py-2 text-sm font-semibold rounded-xl whitespace-nowrap transition-colors shadow-sm ${
                     activeId === rel.primary_user_id 
                       ? 'bg-blue-600 text-white' 
-                      : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+                      : 'bg-white border border-gray-100 text-gray-600 hover:bg-gray-50'
                   }`}
                 >
                   {rel.profiles?.display_name || 'Primary User'}
@@ -102,22 +120,37 @@ export const CompanionDashboard = () => {
               ))}
             </div>
 
-            <div className="p-6 bg-white border border-gray-100 shadow-sm rounded-2xl">
-              <h2 className="mb-4 text-lg font-semibold text-gray-900">Today's Summary</h2>
+            <div className="space-y-2">
+              <h2 className="text-sm font-bold tracking-wider text-gray-500 uppercase">Today's Overview</h2>
               
-              <div className="space-y-4">
-                <div className="flex justify-between pb-3 border-b border-gray-50">
-                  <span className="text-gray-500">👟 Steps</span>
-                  <span className="font-semibold text-gray-900">{steps.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between pb-3 border-b border-gray-50">
-                  <span className="text-gray-500">🍱 Calories</span>
-                  <span className="font-semibold text-orange-600">{calories.toLocaleString()} kcal</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">✨ Current Mood</span>
-                  <span className="font-semibold text-purple-600">{latestMood}</span>
-                </div>
+              {/* Analytics Grid */}
+              <div className="grid grid-cols-2 gap-4">
+                <MetricCard 
+                  icon="👟" title="Steps" value={metrics.steps.toLocaleString()} 
+                  color="text-green-600" bg="bg-green-50" 
+                />
+                <MetricCard 
+                  icon="💧" title="Water" value={`${metrics.water} ml`} 
+                  color="text-blue-600" bg="bg-blue-50" 
+                />
+                <MetricCard 
+                  icon="🍱" title="Calories" value={`${metrics.calories} kcal`} 
+                  color="text-orange-600" bg="bg-orange-50" 
+                />
+                <MetricCard 
+                  icon="✨" title="Mood" value={metrics.mood} 
+                  color="text-purple-600" bg="bg-purple-50" 
+                />
+                <MetricCard 
+                  icon="⚖️" title="Weight" value={metrics.weight} 
+                  color="text-gray-600" bg="bg-gray-100" 
+                />
+                {metrics.periodFlow && (
+                  <MetricCard 
+                    icon="🩸" title="Cycle" value={`${metrics.periodFlow} Flow`} 
+                    color="text-red-600" bg="bg-red-50" 
+                  />
+                )}
               </div>
             </div>
           </>

@@ -26,7 +26,6 @@ export const WeightTracker = () => {
         <input type="number" step="0.1" value={weight} onChange={(e) => setWeight(e.target.value)} placeholder="Enter weight" className="flex-1 px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500" required />
         <select value={unit} onChange={(e) => setUnit(e.target.value)} className="px-4 py-2 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500">
           <option value="kg">kg</option>
-          <option value="lbs">lbs</option>
         </select>
         <button type="submit" className="px-4 py-2 font-semibold text-white transition-colors bg-purple-500 rounded-xl hover:bg-purple-600 active:scale-95">Log</button>
       </form>

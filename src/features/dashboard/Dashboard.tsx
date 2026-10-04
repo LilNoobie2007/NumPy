@@ -1,4 +1,4 @@
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, useEffect, useState } from 'react';
 import { useAuth } from '../../app/providers/AuthProvider';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase/client';
@@ -23,6 +23,24 @@ const TrackerSkeleton = () => (
 export const Dashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [displayName, setDisplayName] = useState<string>('');
+
+  // Fetch the user's customized display name
+  useEffect(() => {
+    const fetchName = async () => {
+      if (!user) return;
+      const { data } = await supabase
+        .from('profiles')
+        .select('display_name')
+        .eq('id', user.id)
+        .single();
+      
+      if (data?.display_name) {
+        setDisplayName(data.display_name);
+      }
+    };
+    fetchName();
+  }, [user]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -34,14 +52,14 @@ export const Dashboard = () => {
 
   return (
     <div className="min-h-screen pb-20 bg-gray-50">
-      {/* Header width is now constrained to match the cards */}
       <header className="sticky top-0 z-10 bg-white shadow-sm">
         <div className="flex items-center justify-between max-w-md px-6 py-5 mx-auto">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{greeting}</h1>
-            <p className="text-sm font-medium text-gray-500">Today's Progress</p>
+            {/* Display Name renders here, falling back to Today's Progress if loading */}
+            <p className="text-sm font-medium text-gray-500">{displayName || "Today's Progress"}</p>
           </div>
-          <div className="flex gap-2 overflow-x-auto">
+          <div className="flex gap-2 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             <button onClick={() => navigate('/calendar')} className="px-3 py-1 text-sm font-medium text-purple-600 transition-colors bg-purple-50 rounded-lg hover:bg-purple-100 whitespace-nowrap">Calendar</button>
             <button onClick={() => navigate('/companion')} className="px-3 py-1 text-sm font-medium text-blue-600 transition-colors bg-blue-50 rounded-lg hover:bg-blue-100 whitespace-nowrap">Friends</button>
             <button onClick={() => navigate('/settings')} className="px-3 py-1 text-sm font-medium text-gray-600 transition-colors bg-gray-100 rounded-lg hover:bg-gray-200 whitespace-nowrap">Settings</button>

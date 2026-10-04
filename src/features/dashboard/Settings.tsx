@@ -1,115 +1,120 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../app/providers/AuthProvider';
-import { getRelationships, addCompanion, revokeCompanionAccess, type Relationship } from '../../lib/supabase/relationshipService';
+import { useNavigate } from 'react-router-dom';
+import { addCompanionStrict, getWhoIsTrackingMe, revokeAccess } from '../../lib/supabase/relationshipService';
 
 export const Settings = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [relationships, setRelationships] = useState<Relationship[]>([]);
-  const [companionId, setCompanionId] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [friendCode, setFriendCode] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Track who is viewing MY data
+  const [myPartner, setMyPartner] = useState<{relationshipId: string, partnerName: string} | null>(null);
 
   useEffect(() => {
-    if (user) loadRelationships();
+    if (user) {
+      loadMyPartner();
+    }
   }, [user]);
 
-  const loadRelationships = async () => {
+  const loadMyPartner = async () => {
     if (!user) return;
-    const data = await getRelationships(user.id);
-    setRelationships(data);
-    setLoading(false);
+    const partner = await getWhoIsTrackingMe(user.id);
+    setMyPartner(partner);
   };
 
-  const handleAddCompanion = async (e: React.FormEvent) => {
+  const handleAddFriend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !companionId) return;
+    if (!user || !friendCode.trim()) return;
+    
+    setIsSubmitting(true);
     try {
-      await addCompanion(user.id, companionId);
-      setCompanionId('');
-      loadRelationships();
-      alert('Companion added successfully!');
-    } catch (error) {
-      console.error(error);
-      alert('Failed to add companion. Check if the ID is correct.');
+      await addCompanionStrict(user.id, friendCode.trim());
+      setFriendCode('');
+      alert('Partner connected successfully! Go to the Friends tab to see their data.');
+    } catch (error: any) {
+      alert(error.message || 'Failed to add partner. Make sure the code is correct.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const handleRevoke = async (id: string) => {
-    if (!confirm('Are you sure you want to revoke this companion?')) return;
+  const handleRevoke = async () => {
+    if (!myPartner) return;
+    const confirmRevoke = window.confirm(`Are you sure you want to revoke ${myPartner.partnerName}'s access to your data?`);
+    if (!confirmRevoke) return;
+
     try {
-      await revokeCompanionAccess(id);
-      loadRelationships();
+      await revokeAccess(myPartner.relationshipId);
+      setMyPartner(null);
+      alert('Access revoked.');
     } catch (error) {
-      console.error(error);
+      alert('Failed to revoke access.');
     }
   };
-
-  if (loading) return <div className="p-4 text-center">Loading Settings...</div>;
 
   return (
-    <div className="min-h-screen pb-20 bg-gray-50">
-      <header className="sticky top-0 z-10 flex items-center gap-4 px-6 py-5 bg-white shadow-sm">
-        <button onClick={() => navigate('/')} className="text-gray-500 hover:text-gray-900">
-          ← Back
+    <div className="min-h-screen p-6 bg-gray-50">
+      <header className="flex items-center gap-4 mb-8 max-w-md mx-auto">
+        <button onClick={() => navigate('/')} className="text-gray-400 transition-colors hover:text-gray-900">
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
         </button>
-        <h1 className="text-xl font-bold text-gray-900">Settings & Privacy</h1>
+        <h1 className="text-xl font-bold text-gray-900">Settings</h1>
       </header>
 
-      <main className="max-w-md p-6 mx-auto space-y-6">
+      <div className="max-w-md mx-auto space-y-6">
         
-        {/* Friend Code Section */}
+        {/* Your Code */}
         <div className="p-6 bg-white border border-gray-100 shadow-sm rounded-2xl">
-          <h2 className="mb-2 text-lg font-semibold text-gray-900">Your Friend Code</h2>
-          <p className="mb-4 text-sm text-gray-500">Share this ID with someone so they can invite you as a companion.</p>
-          <code className="block p-3 text-xs bg-gray-100 rounded-lg select-all break-all">
+          <h2 className="text-sm font-bold tracking-wider text-gray-500 uppercase mb-2">My Friend Code</h2>
+          <p className="text-xs text-gray-500 mb-3">Share this code with your partner so they can track your progress.</p>
+          <div className="p-3 bg-gray-50 rounded-xl border border-gray-100 break-all font-mono text-sm text-gray-800">
             {user?.id}
-          </code>
+          </div>
         </div>
 
-        {/* Add Companion Section */}
+        {/* Who is tracking you */}
         <div className="p-6 bg-white border border-gray-100 shadow-sm rounded-2xl">
-          <h2 className="mb-2 text-lg font-semibold text-gray-900">Add a Companion</h2>
-          <p className="mb-4 text-sm text-gray-500">Enter a user's Friend Code to let them view your daily tracking data.</p>
-          <form onSubmit={handleAddCompanion} className="flex gap-2">
+          <h2 className="text-sm font-bold tracking-wider text-gray-500 uppercase mb-4">My Partner</h2>
+          {myPartner ? (
+            <div className="flex items-center justify-between p-4 bg-blue-50 border border-blue-100 rounded-xl">
+              <div>
+                <p className="text-xs text-blue-600 font-bold uppercase tracking-wider mb-1">Connected</p>
+                <p className="text-sm font-medium text-gray-900">{myPartner.partnerName} can view your data.</p>
+              </div>
+              <button onClick={handleRevoke} className="px-4 py-2 text-sm font-semibold text-red-600 bg-red-100 rounded-lg hover:bg-red-200 transition-colors">
+                Revoke
+              </button>
+            </div>
+          ) : (
+            <p className="text-sm text-gray-500">No one is currently tracking your data.</p>
+          )}
+        </div>
+
+        {/* Connect to someone else */}
+        <div className="p-6 bg-white border border-gray-100 shadow-sm rounded-2xl">
+          <h2 className="text-sm font-bold tracking-wider text-gray-500 uppercase mb-4">Track a Partner</h2>
+          <form onSubmit={handleAddFriend} className="flex gap-2">
             <input 
               type="text" 
-              value={companionId} 
-              onChange={(e) => setCompanionId(e.target.value)} 
-              placeholder="Paste Friend Code..." 
-              className="flex-1 px-4 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" 
+              value={friendCode} 
+              onChange={(e) => setFriendCode(e.target.value)} 
+              placeholder="Paste their Friend Code" 
+              className="flex-1 px-4 py-3 text-sm font-medium text-gray-700 transition-colors border shadow-sm bg-gray-50 border-gray-100 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               required 
             />
-            <button type="submit" className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700">Add</button>
+            <button 
+              type="submit" 
+              disabled={isSubmitting}
+              className="px-6 py-3 font-semibold text-white transition-colors bg-blue-600 shadow-sm rounded-xl hover:bg-blue-700 active:scale-95 disabled:opacity-50"
+            >
+              Add
+            </button>
           </form>
         </div>
 
-        {/* Manage Companions Section */}
-        <div className="p-6 bg-white border border-gray-100 shadow-sm rounded-2xl">
-          <h2 className="mb-4 text-lg font-semibold text-gray-900">Authorized Companions</h2>
-          {relationships.length === 0 ? (
-            <p className="text-sm text-gray-500">You have not authorized anyone to view your data.</p>
-          ) : (
-            <div className="space-y-3">
-              {relationships.map((rel) => (
-                <div key={rel.id} className="flex items-center justify-between p-3 border border-gray-100 bg-gray-50 rounded-xl">
-                  <div>
-                    <p className="text-sm font-semibold text-gray-700">{rel.profiles?.display_name || rel.companion_user_id}</p>
-                    <span className={`text-xs font-semibold ${rel.status === 'active' ? 'text-green-600' : 'text-red-600'}`}>
-                      {rel.status.toUpperCase()}
-                    </span>
-                  </div>
-                  {rel.status === 'active' && (
-                    <button onClick={() => handleRevoke(rel.id)} className="px-3 py-1 text-xs font-semibold text-red-600 bg-red-100 rounded-lg hover:bg-red-200">
-                      Revoke
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </main>
+      </div>
     </div>
   );
 };
