@@ -66,3 +66,5 @@ export default defineConfig([
 To improve code quality for component patterns and DOM manipulations, you can additionally install:
 * **[eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x)** – For core React structural rules.
 * **[eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom)** – For specific React DOM interaction boundaries.
+
+
