@@ -45,3 +45,9 @@ export default defineConfig([
 ```
 
 You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+
+
+## Languages
+The whole Project is byfuercated accross Services built on TypeScript & their required Frontend based on React.Js.
+
+The build follows a Service Oriented Architecture for loose coupling of code.
