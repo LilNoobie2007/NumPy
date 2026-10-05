@@ -4,7 +4,6 @@ import { useAuth } from '../../app/providers/AuthProvider';
 import { getCompanionRelationships, type Relationship } from '../../lib/supabase/relationshipService';
 import { supabase } from '../../lib/supabase/client';
 
-// Reusable UI component for the metric cards
 const MetricCard = ({ icon, title, value, color, bg }: { icon: string, title: string, value: string | number, color: string, bg: string }) => (
   <div className="p-4 bg-white border border-gray-100 shadow-sm rounded-2xl">
     <div className={`w-10 h-10 flex items-center justify-center rounded-full ${bg} ${color} mb-3 text-lg`}>
@@ -21,6 +20,12 @@ export const CompanionDashboard = () => {
   const [following, setFollowing] = useState<Relationship[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Initialize selectedDate to today's local date (YYYY-MM-DD)
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  });
 
   const [metrics, setMetrics] = useState({
     steps: 0,
@@ -44,17 +49,21 @@ export const CompanionDashboard = () => {
     setLoading(false);
   };
 
+  // Re-fetch when the active partner OR the selected date changes
   useEffect(() => {
-    if (activeId) loadCompanionData(activeId);
-  }, [activeId]);
+    if (activeId) loadCompanionData(activeId, selectedDate);
+  }, [activeId, selectedDate]);
 
-  const loadCompanionData = async (targetUserId: string) => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const isoString = today.toISOString();
-    const dateString = isoString.split('T')[0];
+  const loadCompanionData = async (targetUserId: string, dateStr: string) => {
+    // Safely parse local date to avoid timezone offset bugs
+    const [year, month, day] = dateStr.split('-').map(Number);
+    
+    const startOfDay = new Date(year, month - 1, day, 0, 0, 0, 0);
+    const endOfDay = new Date(year, month - 1, day, 23, 59, 59, 999);
 
-    // Fetch all companion data concurrently for speed
+    const startIso = startOfDay.toISOString();
+    const endIso = endOfDay.toISOString();
+
     const [
       { data: stepData },
       { data: mealData },
@@ -63,12 +72,12 @@ export const CompanionDashboard = () => {
       { data: weightData },
       { data: periodData }
     ] = await Promise.all([
-      supabase.from('step_logs').select('steps').eq('user_id', targetUserId).gte('recorded_at', isoString),
-      supabase.from('meals').select('estimated_calories').eq('user_id', targetUserId).gte('recorded_at', isoString),
-      supabase.from('water_logs').select('amount').eq('user_id', targetUserId).gte('recorded_at', isoString),
-      supabase.from('mood_logs').select('mood_level').eq('user_id', targetUserId).gte('recorded_at', isoString).order('recorded_at', { ascending: false }).limit(1),
-      supabase.from('weight_logs').select('weight').eq('user_id', targetUserId).gte('recorded_at', isoString).order('recorded_at', { ascending: false }).limit(1),
-      supabase.from('period_logs').select('flow_intensity').eq('user_id', targetUserId).eq('start_date', dateString).limit(1)
+      supabase.from('step_logs').select('steps').eq('user_id', targetUserId).gte('recorded_at', startIso).lte('recorded_at', endIso),
+      supabase.from('meals').select('estimated_calories').eq('user_id', targetUserId).gte('recorded_at', startIso).lte('recorded_at', endIso),
+      supabase.from('water_logs').select('amount').eq('user_id', targetUserId).gte('recorded_at', startIso).lte('recorded_at', endIso),
+      supabase.from('mood_logs').select('mood_level').eq('user_id', targetUserId).gte('recorded_at', startIso).lte('recorded_at', endIso).order('recorded_at', { ascending: false }).limit(1),
+      supabase.from('weight_logs').select('weight').eq('user_id', targetUserId).gte('recorded_at', startIso).lte('recorded_at', endIso).order('recorded_at', { ascending: false }).limit(1),
+      supabase.from('period_logs').select('flow_intensity').eq('user_id', targetUserId).eq('start_date', dateStr).limit(1)
     ]);
 
     setMetrics({
@@ -79,6 +88,13 @@ export const CompanionDashboard = () => {
       weight: weightData?.[0]?.weight ? `${weightData[0].weight} kg` : 'No data',
       periodFlow: periodData?.[0]?.flow_intensity || null,
     });
+  };
+
+  // Helper to check if selected date is today
+  const isToday = () => {
+    const now = new Date();
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    return selectedDate === todayStr;
   };
 
   if (loading) return <div className="p-4 text-center text-gray-500 animate-pulse">Loading dashboard...</div>;
@@ -103,7 +119,6 @@ export const CompanionDashboard = () => {
           </div>
         ) : (
           <>
-            {/* Partner Selector Tabs */}
             <div className="flex gap-2 pb-2 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
               {following.map(rel => (
                 <button
@@ -120,10 +135,21 @@ export const CompanionDashboard = () => {
               ))}
             </div>
 
-            <div className="space-y-2">
-              <h2 className="text-sm font-bold tracking-wider text-gray-500 uppercase">Today's Overview</h2>
+            <div className="space-y-4">
+              {/* Header with Date Picker */}
+              <div className="flex items-center justify-between">
+                <h2 className="text-sm font-bold tracking-wider text-gray-500 uppercase">
+                  {isToday() ? "Today's Overview" : "Daily Overview"}
+                </h2>
+                <input
+                  type="date"
+                  value={selectedDate}
+                  max={new Date().toISOString().split('T')[0]} // Prevent selecting future dates
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  className="px-3 py-2 text-sm font-medium text-gray-700 transition-colors bg-white border border-gray-200 shadow-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
               
-              {/* Analytics Grid */}
               <div className="grid grid-cols-2 gap-4">
                 <MetricCard 
                   icon="👟" title="Steps" value={metrics.steps.toLocaleString()} 
