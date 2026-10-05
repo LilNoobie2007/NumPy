@@ -53,3 +53,6 @@ dist-ssr/
 *.njsproj
 *.sln
 *.sw?
+
+#PWA-dependency
+dev-dist/
