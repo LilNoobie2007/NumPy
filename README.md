@@ -29,14 +29,6 @@ Most health apps isolate the user. NumPy solves this by providing a shared track
 
 ---
 
-## 📸 Visuals
-
-*(Note: Replace this URL with an actual screenshot or GIF of the app once deployed)*
-
-![NumPy Dashboard Preview](https://via.placeholder.com/800x400.png?text=NumPy+Dashboard+Screenshot)
-
----
-
 ## ⚙️ Installation and Requirements
 
 To run NumPy locally, you need **Node.js 18+** and a **Supabase** account.
