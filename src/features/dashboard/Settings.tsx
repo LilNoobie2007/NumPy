@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../app/providers/AuthProvider';
 import { useNavigate } from 'react-router-dom';
 import { addCompanionStrict, getWhoIsTrackingMe, revokeAccess } from '../../lib/supabase/relationshipService';
+import { enablePushNotifications } from '../../lib/supabase/pushService';
 
 export const Settings = () => {
   const { user } = useAuth();
@@ -12,11 +13,27 @@ export const Settings = () => {
   // Track who is viewing MY data
   const [myPartner, setMyPartner] = useState<{relationshipId: string, partnerName: string} | null>(null);
 
+  // New UI states
+  const [isCopied, setIsCopied] = useState(false);
+  const [isSubscribed, setIsSubscribed] = useState(false);
+
   useEffect(() => {
     if (user) {
       loadMyPartner();
     }
   }, [user]);
+
+  // Check if push notifications are already enabled when the page loads
+  useEffect(() => {
+    const checkSubscription = async () => {
+      if ('serviceWorker' in navigator && 'PushManager' in window) {
+        const registration = await navigator.serviceWorker.ready;
+        const subscription = await registration.pushManager.getSubscription();
+        setIsSubscribed(!!subscription);
+      }
+    };
+    checkSubscription();
+  }, []);
 
   const loadMyPartner = async () => {
     if (!user) return;
@@ -54,6 +71,27 @@ export const Settings = () => {
     }
   };
 
+  // Copy button logic
+  const handleCopy = async () => {
+    if (user?.id) {
+      await navigator.clipboard.writeText(user.id);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    }
+  };
+
+  const handleSubscribe = async () => {
+    try {
+      if (user) {
+        await enablePushNotifications(user.id);
+        setIsSubscribed(true);
+        alert('Notifications enabled successfully!');
+      }
+    } catch (error: any) {
+      alert(error.message || 'Failed to enable notifications.');
+    }
+  };
+
   return (
     <div className="min-h-screen p-6 bg-gray-50">
       <header className="flex items-center gap-4 mb-8 max-w-md mx-auto">
@@ -65,12 +103,46 @@ export const Settings = () => {
 
       <div className="max-w-md mx-auto space-y-6">
         
-        {/* Your Code */}
+        {/* Unified Card for Code & Notifications */}
         <div className="p-6 bg-white border border-gray-100 shadow-sm rounded-2xl">
-          <h2 className="text-sm font-bold tracking-wider text-gray-500 uppercase mb-2">My Friend Code</h2>
-          <p className="text-xs text-gray-500 mb-3">Share this code with your partner so they can track your progress.</p>
-          <div className="p-3 bg-gray-50 rounded-xl border border-gray-100 break-all font-mono text-sm text-gray-800">
-            {user?.id}
+          
+          {/* Friend Code Section */}
+          <div className="mb-6">
+            <h2 className="text-xs font-bold tracking-wider text-gray-500 uppercase">My Friend Code</h2>
+            <p className="mt-1 text-sm text-gray-500">Share this code with your partner so they can track your progress.</p>
+            
+            <div className="flex items-center justify-between mt-3 overflow-hidden bg-gray-50 border border-gray-100 rounded-xl">
+              <code className="px-4 py-3 text-sm text-gray-700 truncate">
+                {user?.id}
+              </code>
+              <button 
+                onClick={handleCopy}
+                className="px-4 py-3 text-sm font-medium text-blue-600 transition-colors bg-blue-50 hover:bg-blue-100 border-l border-gray-100"
+              >
+                {isCopied ? 'Copied!' : 'Copy'}
+              </button>
+            </div>
+          </div>
+
+          {/* Visual Divider */}
+          <hr className="my-6 border-gray-100" />
+
+          {/* Notifications Section */}
+          <div>
+            <h2 className="text-xs font-bold tracking-wider text-gray-500 uppercase">Notifications</h2>
+            <p className="mt-1 text-sm text-gray-500">Enable reminders to log your meals, water, and steps.</p>
+            
+            <button
+              onClick={handleSubscribe}
+              disabled={isSubscribed}
+              className={`w-full py-3 mt-4 text-sm font-semibold transition-colors border rounded-xl ${
+                isSubscribed 
+                  ? 'bg-green-50 text-green-700 border-green-200 cursor-default' 
+                  : 'bg-white text-gray-700 border-gray-200 shadow-sm hover:bg-gray-50 active:scale-95'
+              }`}
+            >
+              {isSubscribed ? '✅ Notifications Enabled' : 'Enable Push Notifications'}
+            </button>
           </div>
         </div>
 
