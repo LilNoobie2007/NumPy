@@ -22,16 +22,16 @@ Most health apps isolate the user. NumPy solves this by providing a shared track
 
 ### ✨ Key Features
 
-* **Real-time Companion Sync:** Share a unique "Friend Code" to instantly link accounts and monitor each other's daily progress.
-* **Automated Smart Reminders:** Supabase Edge Functions which automatically check database logs and send customized web-push notifications if meals, water, or steps aren't logged by specific times.
-* **Comprehensive Tracking:** Helps track Steps, Water, Meals, Weight, Sleep, Mood, and Menstrual Cycles in one clean, gamified dashboard.
-* **PWA Installable:** Behaves like a native app on iOS and Android, complete with a custom Service Worker for offline capabilities and background sync.
+* **Squad Accountability Sync:** Share a unique Friend Code to instantly link accounts and keep your friends in check. Live progress monitoring is seamlessly powered by Vite's hot loading architecture..
+* **Smart Automated Nudges:** Supabase Edge Functions quietly audit your database logs and send customized web-push notifications if you miss your meal, water, or step goals by a specific time.
+* **All in one Gamified Dashboard:** All-in-One Gamified Dashboard: A clean, zero-friction interface to track your complete daily vibe—covering Steps, Water, Meals, Weight, Sleep, Mood, and Menstrual Cycles.
+* **Installable PWA Experience:** Skip the app store but keep the native iOS and Android feel. Custom Service Workers handle background syncing and offline capabilities so you can log data anywhere without a connection.
 
 ---
 
 ## ⚙️ Installation and Requirements
 
-To run NumPy locally, you need **Node.js 18+** and a **Supabase** account.
+To run NumPy locally, you just need a **Node.js 18+** and a **Supabase** account.
 
 ### 1. Clone the Repository
 
@@ -110,6 +110,7 @@ Please ensure all new components strictly use TypeScript and follow the existing
 This project is licensed under the MIT License.
 
 You are free to use, modify, and distribute this software as long as the original copyright header is included. See the `LICENSE` file for the full text.
+
 
 ---
 
