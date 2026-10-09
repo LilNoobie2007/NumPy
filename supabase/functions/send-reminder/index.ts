@@ -12,7 +12,7 @@ const NOTIFICATIONS = {
   lunch: [
     "Your stomach is growling louder than my code compiling. Time for lunch! 🍛",
     "Hanger management alert: Please insert food to continue. 🥪",
-    "Skipping lunch is a red flag. Be a green flag, Diya. 🥗"
+    "Skipping lunch is a red flag. Be a green flag. 🥗"
   ],
   dinner: [
     "Dinner date with your plate? Don't leave it hanging! 🍝",
