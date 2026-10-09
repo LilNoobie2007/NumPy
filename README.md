@@ -18,13 +18,13 @@
 
 **NumPy** is a bespoke, mobile-first Progressive Web App (PWA) built to bridge the gap between personal habit tracking and partner accountability.
 
-Most health apps isolate the user. NumPy solves this by providing a shared tracking ecosystem where users can monitor their daily water intake, step counts, meals, sleep, and mood, while allowing a connected partner to view their progress in real-time. It features automated, Zomato-style push notifications driven by Edge Functions, and dynamic personalized greetings to keep the user motivated.
+Most health apps isolate the user. NumPy solves this by providing a shared tracking ecosystem where users can monitor their daily water intake, step counts, meals, sleep, and mood, while allowing a connected partner to view their progress in real-time. It features automated, Zomato-style creative push notifications driven by Edge Functions, and dynamic personalized greetings to keep the user motivated & active on the application.
 
 ### ✨ Key Features
 
 * **Real-time Companion Sync:** Share a unique "Friend Code" to instantly link accounts and monitor each other's daily progress.
-* **Automated Smart Reminders:** Supabase Edge Functions automatically check database logs and send customized web-push notifications if meals, water, or steps aren't logged by specific times.
-* **Comprehensive Tracking:** Track Steps, Water, Meals, Weight, Sleep, Mood, and Menstrual Cycles in one clean, gamified dashboard.
+* **Automated Smart Reminders:** Supabase Edge Functions which automatically check database logs and send customized web-push notifications if meals, water, or steps aren't logged by specific times.
+* **Comprehensive Tracking:** Helps track Steps, Water, Meals, Weight, Sleep, Mood, and Menstrual Cycles in one clean, gamified dashboard.
 * **PWA Installable:** Behaves like a native app on iOS and Android, complete with a custom Service Worker for offline capabilities and background sync.
 
 ---
