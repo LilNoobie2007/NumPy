@@ -57,7 +57,7 @@ export const HistoryCalendar = () => {
             </div>
             
             <div className="grid grid-cols-7 gap-1">
-              {padding.map(p => <div key={`pad-${p}`} className="h-20 bg-gray-50 rounded-xl" />)}
+              {padding.map(p => <div key={`pad-${p}`} className="h-20 bg-gray-50 rounded-lg" />)}
               
               {days.map(day => {
                 const dateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
@@ -67,7 +67,8 @@ export const HistoryCalendar = () => {
                 return (
                   <div 
                     key={day} 
-                    className={`h-24 p-1 border overflow-hidden rounded-xl flex flex-col items-center ${isPeriod ? 'border-red-200 bg-red-50' : 'border-gray-100 bg-white'}`}
+                    {/* Adjusted height and padding to ensure cells fit neatly on narrow mobile screens */}
+                    className={`h-20 p-1 border overflow-hidden rounded-lg flex flex-col items-center ${isPeriod ? 'border-red-200 bg-red-50' : 'border-gray-100 bg-white'}`}
                   >
                     <span className={`text-xs font-bold mb-1 ${isPeriod ? 'text-red-700' : 'text-gray-700'}`}>
                       {day}

@@ -59,16 +59,18 @@ export const StepTracker = () => {
       </div>
 
       <form onSubmit={handleAddSteps} className="flex gap-2">
+        {/* min-w-0 ensures the input shrinks on small screens instead of pushing the button off */}
         <input
           type="number"
           value={inputSteps}
           onChange={(e) => setInputSteps(e.target.value)}
           placeholder="Enter steps (e.g. 1000)"
-          className="flex-1 px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
+          className="flex-1 min-w-0 px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
         />
+        {/* shrink-0 prevents the button from being compressed */}
         <button
           type="submit"
-          className="px-4 py-2 font-semibold text-white transition-colors bg-green-500 rounded-xl hover:bg-green-600 active:scale-95"
+          className="shrink-0 px-4 py-2 font-semibold text-white transition-colors bg-green-500 rounded-xl hover:bg-green-600 active:scale-95"
         >
           Add
         </button>

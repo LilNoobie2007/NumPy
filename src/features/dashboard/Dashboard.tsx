@@ -57,6 +57,7 @@ const FLIRTY_QUOTES = [
   "If I could rearrange the alphabet, I'd put U and I together.",
   "You're looking especially fine today. Don't forget to track your mood!"
 ];
+
 export const Dashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -91,16 +92,15 @@ export const Dashboard = () => {
   return (
     <div className="min-h-screen pb-20 bg-gray-50">
       <header className="sticky top-0 z-10 bg-white shadow-sm">
-        {/* 2. Changed to flex-col to prevent horizontal squishing */}
         <div className="flex flex-col gap-4 max-w-md px-6 py-5 mx-auto">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{greeting}</h1>
-            {/* 3. Removed purple/italic, updated to clean slate/gray theme */}
             <p className="mt-1.5 text-sm font-medium text-gray-500 leading-relaxed pr-2">
               {quote}
             </p>
           </div>
-          <div className="flex gap-2 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          {/* Flex-wrap replaces the overflow-x-auto to prevent off-screen buttons */}
+          <div className="flex flex-wrap gap-2 pb-1">
             <button onClick={() => navigate('/calendar')} className="px-4 py-1.5 text-sm font-medium text-purple-600 transition-colors bg-purple-50 rounded-lg hover:bg-purple-100 whitespace-nowrap">Calendar</button>
             <button onClick={() => navigate('/companion')} className="px-4 py-1.5 text-sm font-medium text-blue-600 transition-colors bg-blue-50 rounded-lg hover:bg-blue-100 whitespace-nowrap">Friends</button>
             <button onClick={() => navigate('/settings')} className="px-4 py-1.5 text-sm font-medium text-gray-600 transition-colors bg-gray-100 rounded-lg hover:bg-gray-200 whitespace-nowrap">Settings</button>
