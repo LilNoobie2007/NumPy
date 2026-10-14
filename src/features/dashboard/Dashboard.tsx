@@ -24,7 +24,7 @@ const FLIRTY_QUOTES = [
   "Looking at you is the only cardio I need, but you should still log your steps.",
   "You're doing amazing today, gorgeous.",
   "Are you a campfire? Because you're hot and I want s'mores. (Log your food!)",
-  "You're my favorite distraction, Now back to your daily goals!",
+  "You're my favorite distraction. Now back to your daily goals!",
   "I believe in you almost as much as I'm obsessed with you.",
   "Even the prettiest beach sunset has nothing on you. Stay hydrated!",
   "Did you smile today? If not, think of me. Also, drink some water.",
@@ -63,7 +63,6 @@ export const Dashboard = () => {
   const navigate = useNavigate();
   const [displayName, setDisplayName] = useState<string>('');
   
-  // 1. Bulletproof state initialization prevents the reload loop
   const [quote] = useState(() => FLIRTY_QUOTES[Math.floor(Math.random() * FLIRTY_QUOTES.length)]);
 
   useEffect(() => {
@@ -91,36 +90,53 @@ export const Dashboard = () => {
 
   return (
     <div className="min-h-screen pb-20 bg-gray-50">
-      <header className="sticky top-0 z-10 bg-white shadow-sm">
-        <div className="flex flex-col gap-4 max-w-md px-6 py-5 mx-auto">
+      {/* Sleek, frosted glass sticky header */}
+      <header className="sticky top-0 z-10 bg-white/90 backdrop-blur-md shadow-sm border-b border-gray-100">
+        <div className="flex flex-col gap-2.5 max-w-md px-5 py-3.5 mx-auto">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">{greeting}</h1>
-            <p className="mt-1.5 text-sm font-medium text-gray-500 leading-relaxed pr-2">
+            <h1 className="text-xl font-bold text-gray-900">{greeting}</h1>
+            <p className="mt-0.5 text-xs font-medium text-gray-500 leading-snug">
               {quote}
             </p>
           </div>
-          {/* Flex-wrap replaces the overflow-x-auto to prevent off-screen buttons */}
-          <div className="flex flex-wrap gap-2 pb-1">
-            <button onClick={() => navigate('/calendar')} className="px-4 py-1.5 text-sm font-medium text-purple-600 transition-colors bg-purple-50 rounded-lg hover:bg-purple-100 whitespace-nowrap">Calendar</button>
-            <button onClick={() => navigate('/companion')} className="px-4 py-1.5 text-sm font-medium text-blue-600 transition-colors bg-blue-50 rounded-lg hover:bg-blue-100 whitespace-nowrap">Friends</button>
-            <button onClick={() => navigate('/settings')} className="px-4 py-1.5 text-sm font-medium text-gray-600 transition-colors bg-gray-100 rounded-lg hover:bg-gray-200 whitespace-nowrap">Settings</button>
-            <button onClick={handleSignOut} className="px-4 py-1.5 text-sm font-medium text-red-600 transition-colors bg-red-50 rounded-lg hover:bg-red-100 whitespace-nowrap">Sign Out</button>
+          {/* Tighter gaps and smaller text sizes to force a compact single line if possible */}
+          <div className="flex flex-wrap gap-1.5">
+            <button onClick={() => navigate('/calendar')} className="px-3 py-1.5 text-xs font-medium text-purple-600 transition-colors bg-purple-50 rounded-md hover:bg-purple-100">Calendar</button>
+            <button onClick={() => navigate('/companion')} className="px-3 py-1.5 text-xs font-medium text-blue-600 transition-colors bg-blue-50 rounded-md hover:bg-blue-100">Friends</button>
+            <button onClick={() => navigate('/settings')} className="px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors bg-gray-100 rounded-md hover:bg-gray-200">Settings</button>
+            <button onClick={handleSignOut} className="px-3 py-1.5 text-xs font-medium text-red-600 transition-colors bg-red-50 rounded-md hover:bg-red-100">Sign Out</button>
           </div>
         </div>
       </header>
 
-      <main className="max-w-md p-6 mx-auto space-y-6">
-        <Suspense fallback={<div className="space-y-6"><TrackerSkeleton /><TrackerSkeleton /><TrackerSkeleton /></div>}>
+    <main className="max-w-md p-6 mx-auto space-y-6 overflow-x-hidden">
+      <Suspense fallback={<div className="space-y-6"><TrackerSkeleton /><TrackerSkeleton /><TrackerSkeleton /></div>}>
+        <div className="animate-slide-up" style={{ animationDelay: '0ms' }}>
           <WeeklyStepsChart />
+        </div>
+        <div className="animate-slide-up" style={{ animationDelay: '75ms' }}>
           <WaterTracker />
+        </div>
+        <div className="animate-slide-up" style={{ animationDelay: '150ms' }}>
           <StepTracker />
+        </div>
+        <div className="animate-slide-up" style={{ animationDelay: '225ms' }}>
           <MealTracker />
+        </div>
+        <div className="animate-slide-up" style={{ animationDelay: '300ms' }}>
           <PeriodTracker />
+        </div>
+        <div className="animate-slide-up" style={{ animationDelay: '375ms' }}>
           <WeightTracker />
+        </div>
+        <div className="animate-slide-up" style={{ animationDelay: '450ms' }}>
           <SleepTracker />
+        </div>
+        <div className="animate-slide-up" style={{ animationDelay: '525ms' }}>
           <MoodTracker />
-        </Suspense>
-      </main>
+        </div>
+      </Suspense>
+    </main>
     </div>
   );
 };
