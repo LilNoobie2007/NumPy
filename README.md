@@ -119,5 +119,5 @@ You are free to use, modify, and distribute this software as long as the origina
 * Developed by Kevin Makwana (LilNoobie2007).
 * Built using the ultra-fast Vite frontend tooling.
 * Backend infrastructure, Authentication, and Edge Functions powered by Supabase.
-* Push Notification architecture built on the Web Push API.
+* Improved & added Push Notification architecture built on the Web Push API.
 * Smooth Touch Friendly UI and load-able animations.
