@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../../app/providers/AuthProvider';
 import { logSleep } from '../../lib/supabase/trackingServices';
+import { triggerHaptic } from '../../lib/haptics';
 
 export const SleepTracker = () => {
   const { user } = useAuth();
@@ -10,6 +11,9 @@ export const SleepTracker = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !start || !end) return;
+    
+    triggerHaptic('success');
+    
     try {
       await logSleep(user.id, new Date(start).toISOString(), new Date(end).toISOString(), 'Good');
       setStart('');
@@ -25,7 +29,6 @@ export const SleepTracker = () => {
       <h2 className="mb-4 text-xl font-semibold text-gray-900">🌙 Sleep</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         
-        {/* Stacked Vertically to prevent clipping */}
         <div className="space-y-3">
           <div>
             <label className="block mb-2 text-xs font-semibold tracking-wider text-gray-500 uppercase">Bedtime</label>
@@ -49,7 +52,7 @@ export const SleepTracker = () => {
           </div>
         </div>
         
-        <button type="submit" className="w-full px-4 py-3 font-semibold text-white transition-colors bg-indigo-500 shadow-sm rounded-xl hover:bg-indigo-600 active:scale-95">
+        <button type="submit" className="w-full px-4 py-3 font-semibold text-white transition-all duration-200 bg-indigo-500 shadow-sm rounded-xl hover:bg-indigo-600 active:scale-90 active:bg-opacity-80">
           Log Sleep
         </button>
       </form>

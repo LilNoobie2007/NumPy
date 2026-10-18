@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../../app/providers/AuthProvider';
 import { logPeriod } from '../../lib/supabase/periodService';
+import { triggerHaptic } from '../../lib/haptics';
 
 export const PeriodTracker = () => {
   const { user } = useAuth();
@@ -8,6 +9,7 @@ export const PeriodTracker = () => {
 
   const handleLog = async (flow: string) => {
     if (!user) return;
+    triggerHaptic('success');
     try {
       await logPeriod(user.id, flow);
       setStep('done');
@@ -26,14 +28,20 @@ export const PeriodTracker = () => {
           <p className="mb-3 text-sm text-gray-600">Are you on your period today?</p>
           <div className="flex gap-2">
             <button 
-              onClick={() => setStep('flow')} 
-              className="flex-1 py-2 text-sm font-medium text-red-600 transition-colors bg-red-50 rounded-xl hover:bg-red-100"
+              onClick={() => {
+                triggerHaptic('light');
+                setStep('flow');
+              }} 
+              className="flex-1 py-2 text-sm font-medium text-red-600 transition-all duration-200 bg-red-50 rounded-xl hover:bg-red-100 active:scale-90 active:bg-opacity-80"
             >
               Yes
             </button>
             <button 
-              onClick={() => setStep('done')} 
-              className="flex-1 py-2 text-sm font-medium text-gray-600 transition-colors bg-gray-50 rounded-xl hover:bg-gray-100"
+              onClick={() => {
+                triggerHaptic('light');
+                setStep('done');
+              }} 
+              className="flex-1 py-2 text-sm font-medium text-gray-600 transition-all duration-200 bg-gray-50 rounded-xl hover:bg-gray-100 active:scale-90 active:bg-opacity-80"
             >
               No
             </button>
@@ -49,7 +57,7 @@ export const PeriodTracker = () => {
               <button 
                 key={flow} 
                 onClick={() => handleLog(flow)} 
-                className="flex-1 py-2 text-sm font-medium text-red-600 transition-colors bg-red-50 rounded-xl hover:bg-red-100 active:scale-95"
+                className="flex-1 py-2 text-sm font-medium text-red-600 transition-all duration-200 bg-red-50 rounded-xl hover:bg-red-100 active:scale-90 active:bg-opacity-80"
               >
                 {flow}
               </button>

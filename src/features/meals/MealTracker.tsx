@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../../app/providers/AuthProvider';
 import { logMeal } from '../../lib/supabase/mealService';
+import { triggerHaptic } from '../../lib/haptics';
 
 const MEAL_TYPES = ['Breakfast', 'Lunch', 'Dinner', 'Snack'];
 
@@ -14,6 +15,9 @@ export const MealTracker = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !calories || !foodItem.trim()) return;
+    
+    // Solid success vibration for a larger form submission
+    triggerHaptic('success');
     
     setIsSubmitting(true);
     try {
@@ -47,8 +51,11 @@ export const MealTracker = () => {
             <button
               key={type}
               type="button"
-              onClick={() => setMealType(type)}
-              className={`flex-1 min-w-[75px] py-2 text-sm font-medium rounded-xl transition-colors ${
+              onClick={() => {
+                triggerHaptic('light'); // Light tick when switching pills
+                setMealType(type);
+              }}
+              className={`flex-1 min-w-[75px] py-2 text-sm font-medium rounded-xl transition-all duration-200 active:scale-90 active:bg-opacity-80 ${
                 mealType === type
                   ? 'bg-orange-500 text-white shadow-sm'
                   : 'bg-orange-50 text-orange-700 hover:bg-orange-100'
@@ -81,7 +88,7 @@ export const MealTracker = () => {
             <button 
               type="submit" 
               disabled={isSubmitting}
-              className="px-6 py-3 font-semibold text-white transition-colors bg-orange-500 shadow-sm rounded-xl hover:bg-orange-600 active:scale-95 disabled:opacity-50"
+              className="px-6 py-3 font-semibold text-white transition-all duration-200 bg-orange-500 shadow-sm rounded-xl hover:bg-orange-600 active:scale-90 active:bg-opacity-80 disabled:opacity-50"
             >
               Log
             </button>

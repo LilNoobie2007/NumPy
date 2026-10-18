@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../app/providers/AuthProvider';
 import { getTodayWaterTotal, logWater } from '../../lib/supabase/waterService';
+import { triggerHaptic } from '../../lib/haptics';
 
 export const WaterTracker = () => {
   const { user } = useAuth();
@@ -21,6 +22,9 @@ export const WaterTracker = () => {
 
   const handleAddWater = async (amount: number) => {
     if (!user) return;
+    
+    // Quick haptic tick for adding water
+    triggerHaptic('light');
     
     // Optimistic UI update for speed
     setTotal(prev => prev + amount);
@@ -59,7 +63,7 @@ export const WaterTracker = () => {
           <button
             key={amount}
             onClick={() => handleAddWater(amount)}
-            className="px-2 py-3 text-sm font-semibold text-blue-700 transition-colors bg-blue-50 rounded-xl hover:bg-blue-100 active:scale-95"
+            className="px-2 py-3 text-sm font-semibold text-blue-700 transition-all duration-200 bg-blue-50 rounded-xl hover:bg-blue-100 active:scale-90 active:bg-opacity-80"
           >
             +{amount} ml
           </button>

@@ -1,5 +1,6 @@
 import { useAuth } from '../../app/providers/AuthProvider';
 import { logMood } from '../../lib/supabase/trackingServices';
+import { triggerHaptic } from '../../lib/haptics';
 
 export const MoodTracker = () => {
   const { user } = useAuth();
@@ -8,6 +9,10 @@ export const MoodTracker = () => {
 
   const handleMood = async (mood: string) => {
     if (!user) return;
+    
+    // Quick haptic tick when tapping an emoji
+    triggerHaptic('light');
+    
     try {
       await logMood(user.id, mood);
       alert(`Mood logged: ${mood}`);
@@ -24,7 +29,7 @@ export const MoodTracker = () => {
           <button 
             key={mood} 
             onClick={() => handleMood(mood)} 
-            className="flex-1 py-3 text-2xl transition-colors border border-gray-100 rounded-xl hover:bg-gray-50 active:scale-95" 
+            className="flex-1 py-3 text-2xl transition-all duration-200 border border-gray-100 rounded-xl hover:bg-gray-50 active:scale-90 active:bg-gray-100" 
             title={mood}
           >
             {emojis[i]}
