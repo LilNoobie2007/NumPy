@@ -18,14 +18,14 @@
 
 **NumPy** is a bespoke, mobile-first Progressive Web App (PWA) built to bridge the gap between personal habit tracking and partner accountability.
 
-Most health apps isolate the user. NumPy solves this by providing a shared tracking ecosystem where users can monitor their daily water intake, step counts, meals, sleep, and mood, while allowing a connected partner to view their progress in real-time. It features automated, Zomato-style creative push notifications driven by Edge Functions, and dynamic personalized greetings to keep the user motivated & active on the application.
+Most health apps isolate the user. NumPy solves this by providing a shared tracking ecosystem where users can monitor their daily water intake, step counts, meals, sleep, and mood, while allowing a connected partner to view their progress in real-time. It features automated, Zomato-style creative push notifications driven by Edge Functions, and dynamic personalized greetings to keep the user motivated & active on the application via Supabase.
 
 ### ✨ Key Features
 
 * **Squad Accountability Sync:** Share a unique Friend Code to instantly link accounts and keep your friends in check. Live progress monitoring is seamlessly powered by Vite's hot loading architecture..
 * **Smart Automated Nudges:** Supabase Edge Functions quietly audit your database logs and send customized web-push notifications if you miss your meal, water, or step goals by a specific time.
 * **All in one Gamified Dashboard:** All-in-One Gamified Dashboard: A clean, zero-friction interface to track your complete daily vibe—covering Steps, Water, Meals, Weight, Sleep, Mood, and Menstrual Cycles.
-* **Installable PWA Experience:** Skip the app store but keep the native iOS and Android feel. Custom Service Workers handle background syncing and offline capabilities so you can log data anywhere without a connection.
+* **Installable PWA Experience:** Skip the app store but keep the native iOS and Android feel. Custom Service Workers handle background syncing and offline capabilities so you can log data anywhere without a connection, & data syncs as network gets reconected.
 
 ---
 
@@ -101,7 +101,7 @@ This project was built as a personalized application, but community suggestions 
 4. Push to the branch: `git push origin feature/your-feature-name`
 5. Open a Pull Request outlining your additions.
 
-Please ensure all new components strictly use TypeScript and follow the existing Tailwind CSS styling conventions.
+Please ensure all new components strictly use TypeScript and follow the existing Tailwind CSS styling & the respective naming conventions.
 
 ---
 
@@ -118,6 +118,6 @@ You are free to use, modify, and distribute this software as long as the origina
 
 * Developed by Kevin Makwana (LilNoobie2007).
 * Built using the ultra-fast Vite frontend tooling.
-* Backend infrastructure, Authentication, and Edge Functions powered by Supabase.
+* Backend infrastructure, Authentication, basic security features and other Edge Functions powered by Supabase.
 * Improved & added Push Notification architecture built on the Web Push API.
 * Smooth Touch Friendly UI and load-able animations.
