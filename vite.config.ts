@@ -32,4 +32,7 @@ export default defineConfig({
       devOptions: {enabled: false}
     }),
   ],
+  resolve: {
+    dedupe: ['react', 'react-dom'],
+  },
 });
