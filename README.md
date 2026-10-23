@@ -101,7 +101,7 @@ This project was built as a personalized application, but community suggestions 
 4. Push to the branch: `git push origin feature/your-feature-name`
 5. Open a Pull Request outlining your additions.
 
-Please ensure all new components strictly use TypeScript and follow the existing Tailwind CSS styling & the respective naming conventions.
+Please ensure all new components strictly use TypeScript and follow the existing Tailwind CSS styling & the respective naming conventions to avoid any discrepencies.
 
 ---
 
@@ -109,7 +109,7 @@ Please ensure all new components strictly use TypeScript and follow the existing
 
 This project is licensed under the MIT License.
 
-You are free to use, modify, and distribute this software as long as the original copyright header is included. See the `LICENSE` file for the full text.
+You are free to use, modify, and distribute this software as long as the original copyright header is included or credits are given. See the `LICENSE` file for the full text.
 
 
 ---
